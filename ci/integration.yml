@@ -1,0 +1,58 @@
+# ci/integration.yml — this repository's own cscs-ci pipeline "integration".
+# Runs automatically on every PR to main and every push to main; its result is
+# the `cscs/integration` status that branch protection requires.
+#
+# The blocks are included with `include: local`, and v1/.ci-ext-mch.yml's
+# nested includes switch to local inside this project too, so the pipeline
+# tests the commit under review, never main.
+#
+# One job per runner. Each runs the shell, env and uv blocks end to end — uv
+# install, a uv sync on a dependency-free fixture project on a uv-managed
+# Python — then checks it landed on the cluster it asked for.
+
+include:
+  - local: '/v1/.ci-ext-mch.yml'
+
+.selftest:
+  variables:
+    SLURM_TIMELIMIT: '00:10:00'
+    # One workdir per job: the three jobs run at the same time.
+    MCH_WORK_NAME: 'mch-recipes-selftest-$CI_JOB_NAME'
+  script:
+    - !reference [.mch-sh-preamble, script]
+    - !reference [.mch-log-ci-context, script]
+    - !reference [.mch-env-paths, script]
+    - !reference [.mch-log-tool-versions, script]
+    - !reference [.mch-install-uv, script]
+    - |
+      cp -r "$CI_PROJECT_DIR/tests/fixture" "$WORK/fixture"
+      cd "$WORK/fixture"
+    - !reference [.mch-uv-sync, script]
+    - |
+      banner "Check the venv's Python"
+      # uv-managed (not the node's /usr/bin/python3) and ships its headers —
+      # the reason .mch-install-uv defaults UV_PYTHON_PREFERENCE=only-managed.
+      uv run python - <<'PY'
+      import os, sys, sysconfig
+      base = os.path.realpath(sys.base_prefix)
+      header = os.path.join(sysconfig.get_paths()["include"], "Python.h")
+      print(f"python {sys.version.split()[0]} at {base}")
+      assert not base.startswith("/usr"), f"system python in use: {base}"
+      assert os.path.exists(header), f"no {header}"
+      PY
+    - !reference [.mch-assert-cluster, script]
+    - !reference [.mch-cleanup, script]
+
+# Whichever cluster cluster.yml names.
+selftest-mch:
+  extends: [.baremetal-runner-mch, .selftest]
+
+selftest-balfrin:
+  extends: [.baremetal-runner-mch-balfrin, .selftest]
+  variables:
+    MCH_EXPECTED_CLUSTER: 'balfrin'
+
+selftest-linard:
+  extends: [.baremetal-runner-mch-linard, .selftest]
+  variables:
+    MCH_EXPECTED_CLUSTER: 'linard'
