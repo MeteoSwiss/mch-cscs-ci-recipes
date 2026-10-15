@@ -13,4 +13,4 @@
 
 .mch-cluster:
   variables:
-    FIRECREST_SYSTEM: 'balfrin'  # balfrin | linard
+    FIRECREST_SYSTEM: 'linard'  # balfrin | linard
