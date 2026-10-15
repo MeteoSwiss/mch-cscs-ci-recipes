@@ -44,4 +44,3 @@ selftest:
       PY
     - !reference [.mch-assert-cluster, script]
     - !reference [.mch-cleanup, script]
-
