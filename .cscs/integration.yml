@@ -6,18 +6,20 @@
 # nested includes switch to local inside this project too, so the pipeline
 # tests the commit under review, never main.
 #
-# One job per runner. Each runs the shell, env and uv blocks end to end — uv
+# One job, on `.baremetal-runner-mch` — the cluster cluster.yml names, i.e. the
+# one every consumer is on. It runs the shell, env and uv blocks end to end — uv
 # install, a uv sync on a dependency-free fixture project on a uv-managed
-# Python — then checks it landed on the cluster it asked for.
+# Python — then checks it landed on that cluster. A PR that switches cluster.yml
+# therefore tests the new cluster before anyone is moved to it.
 
 include:
   - local: '/v1/.ci-ext-mch.yml'
 
-.selftest:
+selftest:
+  extends: [.baremetal-runner-mch]
   variables:
     SLURM_TIMELIMIT: '00:10:00'
-    # One workdir per job: the three jobs run at the same time.
-    MCH_WORK_NAME: 'mch-recipes-selftest-$CI_JOB_NAME'
+    MCH_WORK_NAME: 'mch-recipes-selftest'
   script:
     - !reference [.mch-sh-preamble, script]
     - !reference [.mch-log-ci-context, script]
@@ -43,16 +45,3 @@ include:
     - !reference [.mch-assert-cluster, script]
     - !reference [.mch-cleanup, script]
 
-# Whichever cluster cluster.yml names.
-selftest-mch:
-  extends: [.baremetal-runner-mch, .selftest]
-
-selftest-balfrin:
-  extends: [.baremetal-runner-mch-balfrin, .selftest]
-  variables:
-    MCH_EXPECTED_CLUSTER: 'balfrin'
-
-selftest-linard:
-  extends: [.baremetal-runner-mch-linard, .selftest]
-  variables:
-    MCH_EXPECTED_CLUSTER: 'linard'

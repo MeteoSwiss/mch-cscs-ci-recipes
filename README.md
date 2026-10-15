@@ -180,9 +180,10 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 - **Integration test** — this repository's own cscs-ci pipeline `integration`
   ([`.cscs/integration.yml`](.cscs/integration.yml)), status `cscs/integration`. It includes
   the blocks with `include: local`, and `v1/.ci-ext-mch.yml` switches its own nested
-  includes to `local` inside this project, so the PR commit is what runs. One job per
-  runner runs the preamble, the workdir, the uv install and a `uv sync` on a uv-managed
-  Python, then checks it landed on the expected cluster.
+  includes to `local` inside this project, so the PR commit is what runs. One job, on
+  `.baremetal-runner-mch`, runs the preamble, the workdir, the uv install and a `uv sync`
+  on a uv-managed Python, then checks it landed on the cluster `cluster.yml` names — so a
+  PR that switches cluster is tested on the new cluster before it moves anyone.
 
 cscs-ci does not run pipelines for PRs from forks: push branches to this repository.
 
