@@ -1,7 +1,7 @@
 # mch-cscs-ci-recipes
 
 Shared [CSCS-CI](https://docs.cscs.ch/services/cicd/) building blocks for MeteoSwiss
-repositories: the runner for our bare-metal clusters (balfrin, linard) and the script
+repositories: the runner for the bare-metal clusters (balfrin, linard) and the script
 fragments every pipeline repeats (strict-mode preamble and logging, a per-pipeline
 workdir and its cleanup, a pinned uv). It is a thin layer on top of
 [cscs-ci/recipes](https://gitlab.com/cscs-ci/recipes), in the spirit of
@@ -178,7 +178,7 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
   A consumer pulls the blocks from `main`, so linting it as-is would test `main`;
   [`tests/flatten.sh`](tests/flatten.sh) instead merges the checkout's blocks into it.
 - **Integration test** — this repository's own cscs-ci pipeline `integration`
-  ([`ci/integration.yml`](ci/integration.yml)), status `cscs/integration`. It includes
+  ([`.cscs/integration.yml`](.cscs/integration.yml)), status `cscs/integration`. It includes
   the blocks with `include: local`, and `v1/.ci-ext-mch.yml` switches its own nested
   includes to `local` inside this project, so the PR commit is what runs. One job per
   runner runs the preamble, the workdir, the uv install and a `uv sync` on a uv-managed
@@ -193,7 +193,7 @@ uvx yamllint --strict .
 tests/shellcheck.sh
 tests/flatten.sh > /tmp/merged.gitlab-ci.yml
 uvx check-jsonschema --builtin-schema vendor.gitlab-ci --data-transform gitlab-ci --regex-variant nonunicode \
-  cluster.yml v1/*.yml v1/.ci-ext-mch.yml ci/*.yml examples/*.yml /tmp/merged.gitlab-ci.yml
+  cluster.yml v1/*.yml v1/.ci-ext-mch.yml .cscs/*.yml examples/*.yml /tmp/merged.gitlab-ci.yml
 ```
 
 ## License
