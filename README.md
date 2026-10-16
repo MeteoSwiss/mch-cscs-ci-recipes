@@ -199,4 +199,4 @@ uvx check-jsonschema --builtin-schema vendor.gitlab-ci --data-transform gitlab-c
 
 ## License
 
-[MIT](LICENSE)
+[BSD 3-Clause](LICENSE)
